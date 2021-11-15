@@ -13,7 +13,7 @@ class MyScene extends Phaser.Scene {
     const { width, height } = this.game.canvas;
 
     const addTxt = this.add
-      .text(400, 300, "JANKEN", { fontFamily: "arial", fontSize: "60px" })
+      .text(400, 300, "RPG Battle", { fontFamily: "arial", fontSize: "60px" })
       .setOrigin(0.5);
     const zone = this.add.zone(width / 2, height / 2, width, height);
 
@@ -34,43 +34,81 @@ class Janken extends Phaser.Scene {
   }
   preload() {}
   create() {
-    const g = this.add
-      .text(400, 250, "グー", { fontSize: "36px" })
-      .setOrigin(0.5, 0.5);
-    g.setInteractive();
-    const c = this.add
-      .text(250, 400, "チョキ", { fontSize: "36px" })
-      .setOrigin(0.5, 0.5);
-    c.setInteractive();
-    const p = this.add
-      .text(650, 400, "パー", { fontSize: "36px" })
-      .setOrigin(0.5, 0.5);
-    p.setInteractive();
+    const turnEv = () => {
+      zone.removeListener("pointerup");
+      const types = ["武器", "魔法", "弓矢"];
 
-    g.on(
-      "pointerup",
-      (pointer: PointerEvent) => {
-        console.log("グー");
-        console.log(pointer);
-      },
-      this
-    );
-    c.on(
-      "pointerup",
-      (pointer: PointerEvent) => {
-        console.log("チョキ");
-        console.log(pointer);
-      },
-      this
-    );
-    p.on(
-      "pointerup",
-      (pointer: PointerEvent) => {
-        console.log("パー");
-        console.log(pointer);
-      },
-      this
-    );
+      const randKey = Math.floor(Math.random() * types.length);
+
+      const msg = this.add
+        .text(400, 400, `主人公の${types[randKey]}攻撃`)
+        .setOrigin(0.5, 0.5);
+      const listener_2 = zone.addListener("pointerup", () => {
+        zone.removeListener("pointerup");
+        msg.removeFromDisplayList();
+
+        const eneRandKey = Math.floor(Math.random() * types.length);
+        const offset = randKey - eneRandKey;
+        if (offset == 0) {
+          const msg2 = this.add
+            .text(400, 400, "互角の戦い！")
+            .setOrigin(0.5, 0.5);
+          const listener_3 = zone.addListener("pointerup", () => {
+            zone.removeListener("pointerup");
+            msg2.removeFromDisplayList();
+            turnEv();
+          });
+        }
+        if (offset == 1 || offset == -2) {
+          const msg2 = this.add
+            .text(400, 400, "好相性！ 相手にダメージ！")
+            .setOrigin(0.5, 0.5);
+          eneHP -= 50;
+          const listener_3 = zone.addListener("pointerup", () => {
+            zone.removeListener("pointerup");
+            msg2.removeFromDisplayList();
+            turnEv();
+          });
+        }
+
+        if (offset == 2 || offset == -1) {
+          myHP -= 50;
+          const msg2 = this.add
+            .text(400, 400, "悪相性！ 自分にダメージ！")
+            .setOrigin(0.5, 0.5);
+          const listener_3 = zone.addListener("pointerup", () => {
+            zone.removeListener("pointerup");
+            msg2.removeFromDisplayList();
+            turnEv();
+          });
+        }
+
+        myHPT.setText(myHP.toString());
+        eneHPT.setText(eneHP.toString());
+        
+      });
+    };
+
+    let myHP = 500;
+    let eneHP = 350;
+
+    const { width, height } = this.game.canvas;
+    const zone = this.add.zone(width / 2, height / 2, width, height);
+
+    const enemy = this.add
+      .text(400, 300, "敵", { fontSize: "128px", color: "#999999" })
+      .setOrigin(0.5, 0.5);
+
+    const myHPT = this.add.text(400, 50, myHP.toString()).setOrigin(0.5, 0.5);
+    const eneHPT = this.add
+      .text(400, 550, eneHP.toString())
+      .setOrigin(0.5, 0.5);
+
+    zone.setInteractive();
+
+    const listener_1 = zone.addListener("pointerup", () => {
+      turnEv();
+    });
   }
 }
 
